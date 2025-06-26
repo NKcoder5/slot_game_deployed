@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Slots - Casino Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #000;
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Casino Background with Animation */
+        .casino-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/api/placeholder/1920/1080');
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.4) saturate(1.5);
+            z-index: -3;
+        }
+
+        .casino-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(135deg, rgba(138, 43, 226, 0.2), transparent 70%),
+                linear-gradient(225deg, rgba(220, 20, 60, 0.2), transparent 70%),
+                linear-gradient(315deg, rgba(255, 215, 0, 0.2), transparent 70%);
+            z-index: -2;
+        }
+
+        .casino-carpet {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(45deg, rgba(150, 0, 0, 0.05) 0px, rgba(150, 0, 0, 0.05) 2px, transparent 2px, transparent 4px),
+                repeating-linear-gradient(-45deg, rgba(150, 0, 0, 0.05) 0px, rgba(150, 0, 0, 0.05) 2px, transparent 2px, transparent 4px);
+            z-index: -1;
+        }
+
+        /* Casino Lights */
+        .casino-lights {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .light {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(8px);
+            opacity: 0;
+        }
+
+        /* Main Game Container */
+        .game-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 20px;
+            perspective: 1000px;
+        }
+
+        /* Information Display */
+        .info-display {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 10;
+        }
+
+        .balance-display, .jackpot-display {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px 30px;
+            border-radius: 15px;
+            border: 3px solid #FFD700;
+            box-shadow: 
+                0 0 15px rgba(255, 215, 0, 0.3),
+                inset 0 0 10px rgba(255, 215, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-display::before, .jackpot-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to right,
+                rgba(255, 215, 0, 0) 0%,
+                rgba(255, 215, 0, 0.1) 50%,
+                rgba(255, 215, 0, 0) 100%
+            );
+            transform: rotate(30deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+
+        .balance, .jackpot-text {
+            font-size: 18px;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .balance-amount, .jackpot-amount {
+            font-size: 28px;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+            font-weight: 800;
+        }
+
+        .jackpot-text {
+            animation: jackpotPulse 1.5s infinite alternate;
+        }
+
+        @keyframes jackpotPulse {
+            0% {
+                color: #ffd700;
+                text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            }
+            100% {
+                color: #ff8800;
+                text-shadow: 0 0 20px rgba(255, 136, 0, 0.8);
+            }
+        }
+
+        /* Slot Machine */
+        .slot-machine {
+            width: 90vmin;
+            max-width: 700px;
+            aspect-ratio: 3/4;
+            background: linear-gradient(45deg, #560000, #800000);
+            border-radius: 30px;
+            position: relative;
+            border: 15px solid;
+            border-image: linear-gradient(to right, #975b05, #ffd700, #975b05) 1;
+            box-shadow: 
+                0 0 50px rgba(0, 0, 0, 0.5),
+                inset 0 0 30px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            display: flex;
+            flex-direction: column;
+            transform: rotateX(5deg);
+        }
+
+        /* Machine Top */
+        .machine-top {
+            height: 18%;
+            background: linear-gradient(to bottom, #222, #111);
+            border-radius: 15px 15px 0 0;
+            border-bottom: 8px solid #975b05;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .machine-lights {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .machine-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ffd700;
+            animation: blinkLight 0.3s infinite alternate;
+        }
+
+        .machine-light:nth-child(odd) {
+            animation-delay: 0.15s;
+        }
+
+        @keyframes blinkLight {
+            0% {
+                opacity: 0.3;
+                box-shadow: 0 0 5px #ffd700;
+            }
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 15px #ffd700;
+            }
+        }
+
+        .machine-name {
+            font-family: 'Bungee Inline', cursive;
+            font-size: clamp(24px, 5vmin, 48px);
+            color: #ffd700;
+            text-transform: uppercase;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.5),
+                0 0 10px #ff0,
+                0 0 20px #ff0;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 2px;
+            animation: titleGlow 2s infinite alternate;
+        }
+
+        .machine-subtitle {
+            font-size: clamp(12px, 2vmin, 18px);
+            color: #fff;
+            text-shadow: 0 0 5px #ff0;
+            margin-top: 5px;
+            letter-spacing: 3px;
+        }
+
+        /* Reels Container */
+        .reels-container {
+            flex: 1;
+            padding: 20px;
+            background: #222;
+            margin: 15px;
+            border-radius: 20px;
+            border: 8px solid #975b05;
+            position: relative;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .reels {
+            display: flex;
+            gap: 15px;
+            background: #000;
+            padding: 15px;
+            border-radius: 15px;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            flex: 1;
+        }
+
+        .reel-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: #fff;
+            border: 6px solid #975b05;
+            border-radius: 12px;
+            box-shadow: 
+                inset 0 0 20px rgba(0, 0, 0, 0.3),
+                0 0 10px rgba(255, 215, 0, 0.2);
+        }
+
+        /* Reel and Symbols */
+        .reel {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.1s linear;
+        }
+
+        .symbol {
+            width: 100%;
+            height: 33.33%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(32px, 8vmin, 64px);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+            background: rgb(250, 250, 250);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .symbol.special {
+            animation: specialSymbolGlow 1s infinite alternate;
+        }
+
+        @keyframes specialSymbolGlow {
+            0% {
+                text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            }
+            100% {
+                text-shadow: 0 0 15px rgba(255, 215, 0, 1);
+            }
+        }
+
+        .payline {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 33.33%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 215, 0, 0.1);
+            border-top: 2px dashed rgba(255, 215, 0, 0.5);
+            border-bottom: 2px dashed rgba(255, 215, 0, 0.5);
+            pointer-events: none;
+            z-index: 1;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .payline::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            width: calc(100% + 20px);
+            height: 100%;
+            background: linear-gradient(
+                to right,
+                rgba(255, 215, 0, 0.2) 0%,
+                rgba(255, 215, 0, 0) 10%,
+                rgba(255, 215, 0, 0) 90%,
+                rgba(255, 215, 0, 0.2) 100%
+            );
+        }
+
+        /* Machine Bottom */
+        .machine-bottom {
+            height: 18%;
+            background: linear-gradient(to top, #222, #111);
+            border-top: 8px solid #975b05;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            position: relative;
+            border-radius: 0 0 15px 15px;
+        }
+
+        /* Control Buttons */
+        .control-btn {
+            padding: 15px 30px;
+            font-size: clamp(16px, 3vmin, 22px);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            box-shadow: 
+                0 5px 15px rgba(0, 0, 0, 0.3),
+                inset 0 -8px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .spin-btn {
+            background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+            min-width: 150px;
+        }
+
+        .spin-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(30deg);
+            animation: spinButtonShine 3s infinite;
+        }
+
+        @keyframes spinButtonShine {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+
+        .stop-btn {
+            background: linear-gradient(to bottom, #F44336, #B71C1C);
+            min-width: 150px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 20px rgba(0, 0, 0, 0.4),
+                inset 0 -8px 0 rgba(0, 0, 0, 0.3);
+            filter: brightness(1.1);
+        }
+
+        .control-btn:active {
+            transform: translateY(1px);
+            box-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.3),
+                inset 0 -4px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 
+                0 5px 15px rgba(0, 0, 0, 0.3),
+                inset 0 -8px 0 rgba(0, 0, 0, 0.3);
+            filter: brightness(0.8) grayscale(0.5);
+        }
+
+        /* Lever Design */
+        .lever-container {
+            position: absolute;
+            right: -120px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 120px;
+            height: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            z-index: 100;
+        }
+
+        .lever-base {
+            width: 60px;
+            height: 120px;
+            background: linear-gradient(90deg, #600, #a00);
+            border-radius: 15px;
+            position: relative;
+            box-shadow: 
+                0 0 20px rgba(255, 0, 0, 0.3),
+                inset 0 0 15px rgba(0, 0, 0, 0.5);
+            border: 4px solid #800;
+            z-index: 1;
+        }
+
+        .lever-base::before, .lever-base::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff0;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ff0;
+            animation: leverLightBlink 0.5s infinite alternate;
+        }
+
+        .lever-base::before {
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .lever-base::after {
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        @keyframes leverLightBlink {
+            0% {
+                opacity: 0.5;
+                box-shadow: 0 0 5px #ff0;
+            }
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 15px #ff0;
+            }
+        }
+
+        .lever-stick {
+            width: 20px;
+            height: 200px;
+            background: linear-gradient(90deg, #600, #800);
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            transform-origin: top center;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 0;
+            border-radius: 10px;
+        }
+
+        .lever-handle {
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle at 30% 30%, #f00, #700);
+            border: 6px solid #800;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            box-shadow: 
+                0 0 20px rgba(255, 0, 0, 0.5),
+                inset 0 0 10px rgba(255, 255, 0, 0.3);
+            transition: all 0.3s;
+            z-index: 2;
+        }
+
+        .lever-handle:hover {
+            transform: translateX(-50%) scale(1.1);
+            box-shadow: 
+                0 0 30px rgba(255, 0, 0, 0.7),
+                inset 0 0 15px rgba(255, 255, 0, 0.5);
+        }
+
+        .lever-handle:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        .lever-stick.pulled {
+            transform: translateX(-50%) rotate(60deg);
+            transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        .lever-stick.return {
+            transform: translateX(-50%) rotate(0deg);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        /* Win Display */
+        .win-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            z-index: 1000;
+            border: 8px solid #ffd700;
+            box-shadow: 
+                0 0 100px rgba(255, 215, 0, 0.5),
+                0 0 50px rgba(255, 215, 0, 0.5),
+                inset 0 0 30px rgba(255, 215, 0, 0.3);
+            transition: transform 0.3s;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .win-display.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            visibility: visible;
+            animation: winPulse 0.5s ease-out;
+        }
+
+        .win-text {
+            font-size: clamp(24px, 5vmin, 48px);
+            color: #ffd700;
+            text-shadow: 
+                0 0 10px #ffd700,
+                0 0 20px #ffd700;
+            margin-bottom: 20px;
+            font-family: 'Bungee Inline', cursive;
+            animation: winTextGlow 1s infinite alternate;
+        }
+
+        .win-amount {
+            font-size: clamp(32px, 8vmin, 64px);
+            color: #fff;
+            text-shadow: 0 0 20px #ffd700;
+            font-weight: 800;
+        }
+
+        .win-coins {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 900;
+        }
+
+        .coin {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #ffd700;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+            animation: fallCoin 2s linear forwards;
+            opacity: 0;
+        }
+
+        @keyframes fallCoin {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 1;
+            }
+        }
+
+        /* Jackpot Animation */
+        .jackpot-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 950;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .jackpot-animation.show {
+            opacity: 1;
+            visibility: visible;
+            animation: jackpotShowHide 5s forwards;
+        }
+
+        @keyframes jackpotShowHide {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        .jackpot-starburst {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle, rgba(255,215,0,0.3) 0%, rgba(255,215,0,0) 70%);
+            animation: burstGrow 1s ease-out forwards;
+        }
+
+        @keyframes burstGrow {
+            0% { transform: scale(0); opacity: 0.8; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .jackpot-text-animation {
+            font-family: 'Bungee Inline', cursive;
+            font-size: clamp(48px, 15vmin, 150px);
+            color: #ffd700;
+            text-shadow: 
+                0 0 20px #ffd700,
+                0 0 40px #ffd700,
+                0 0 60px #ffd700;
+            text-align: center;
+            animation: jackpotTextAnimation 4s ease-out;
+            z-index: 1;
+            transform: scale(0);
+        }
+
+        @keyframes jackpotTextAnimation {
+            0% { transform: scale(0); opacity: 0; }
+            10% { transform: scale(1.2); opacity: 1; }
+            20% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            90% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0; }
+        }
+
+        @keyframes titleGlow {
+            0% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px #ff0, 0 0 20px #ff0; }
+            100% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px #ff0, 0 0 40px #ff0; }
+        }
+
+        @keyframes winPulse {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @keyframes winTextGlow {
+            0% { text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700; }
+            100% { text-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700, 0 0 60px #ffd700; }
+        }
+
+        /* Spin Animation */
+        @keyframes spinReel {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-33.33%); }
+        }
+
+        .reel.spinning {
+            animation: spinReel 0.15s linear infinite;
+        }
+
+        /* High-Speed Blur Effect for Reels */
+        .reel.blur-effect .symbol {
+            filter: blur(2px);
+            transition: filter 0.3s;
+        }
+
+        .reel.blur-effect:not(.spinning) .symbol {
+            filter: blur(0);
+            transition: filter 0.5s;
+        }
+
+        /* Win Line Flash */
+        .win-line-flash {
+            position: absolute;
+            left: 0;
+            top: 33.33%;
+            width: 100%;
+            height: 33.33%;
+            background: rgba(255, 215, 0, 0.3);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .win-line-flash.flash {
+            animation: lineFlash 0.5s ease-in-out 5;
+        }
+
+        @keyframes lineFlash {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .slot-machine {
+                width: 95vw;
+                max-width: 95vw;
+            }
+            
+            .lever-container {
+                right: -80px;
+                transform: translateY(-50%) scale(0.8);
+            }
+            
+            .control-btn {
+                padding: 12px 20px;
+                min-width: 100px;
+            }
+            
+            .info-display {
+                padding: 0 20px;
+            }
+            
+            .balance-display, .jackpot-display {
+                padding: 10px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .lever-container {
+                right: -60px;
+                transform: translateY(-50%) scale(0.6);
+            }
+            
+            .machine-bottom {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px 0;
+            }
+            
+            .control-btn {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="casino-background"></div>
+    <div class="casino-carpet"></div>
+    <div class="casino-lights"></div>
+
+    <div class="game-container">
+        <div class="info-display">
+            <div class="balance-display">
+                <div class="balance">CREDITS</div>
+                <div class="balance-amount">$<span id="balance">{{ initial_balance|default:1000 }}</span></div>
+            </div>
+            <div class="jackpot-display">
+                <div class="jackpot-text">JACKPOT</div>
+                <div class="jackpot-amount">$<span id="jackpot">10000</span></div>
+            </div>
+        </div>
+
+        <div class="slot-machine">
+            <div class="machine-top">
+                <div class="machine-lights">
+                    <div class="machine-light"></div>
+                    <div class="machine-light"></div>
+                    <div class="machine-light"></div>
+                    <div class="machine-light"></div>
+                    <div class="machine-light"></div>
+                    <div class="machine-light"></div>
+                    <div class="machine-light"></div>
+                    <div class="machine-light"></div>
+                </div>
+                <h1 class="machine-name">Lucky Slots</h1>
+                <div class="machine-subtitle">FORTUNE AWAITS</div>
+            </div>
+
+            <div class="reels-container">
+                <div class="payline"></div>
+                <div class="win-line-flash" id="winLineFlash"></div>
+                <div class="reels">
+                    <div class="reel-container">
+                        <div class="reel" id="reel1"></div>
+                    </div>
+                    <div class="reel-container">
+                        <div class="reel" id="reel2"></div>
+                    </div>
+                    <div class="reel-container">
+                        <div class="reel" id="reel3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lever-container">
+                <div class="lever-base">
+                    <div class="lever-stick" id="leverStick">
+                        <div class="lever-stick">
+                            <div class="lever-handle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="machine-bottom">
+            <div class="control-btn" id="spinBtn">SPIN</div>
+            <div class="control-btn" id="stopBtn">STOP</div>
+        </div>
+
+        <div class="win-display" id="winDisplay">
+            <div class="win-text">WIN</div>
+            <div class="win-amount">$<span id="winAmount">0</span></div>
+            <div class="win-coins" id="winCoins"></div>
+        </div>
+    </div>
+
+    <div class="jackpot-animation" id="jackpotAnimation">
+        <div class="jackpot-starburst"></div>
+        <div class="jackpot-text-animation">JACKPOT</div>
+    </div>
+
+    <script>
+    const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎', '7️⃣', '⭐'];
+    const SYMBOL_VALUES = {
+        '🍒': 2,
+        '🍋': 3,
+        '🍊': 4,
+        '🍇': 5,
+        '🔔': 10,
+        '💎': 25,
+        '7️⃣': 50,
+        '⭐': 100
+    };
+    const SPECIAL_SYMBOLS = ['💎', '7️⃣', '⭐'];
+    const COMMON_SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '🔔'];
+    const SPIN_COST = 5;
+    const MIN_SPIN_TIME = 2000;
+    const MAX_SPIN_TIME = 4000;
+    const REEL_DELAY = 400;
+    const INITIAL_BALANCE = 1000;
+    const JACKPOT_AMOUNT = 10000;
+    const COMMON_WIN_AMOUNT = 10;
+    const MAX_JACKPOT_SPINS = 15;
+    const MAX_COMMON_WIN_SPINS = 7;
+
+    // Audio Context
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    // Elements
+    const reel1 = document.getElementById('reel1');
+    const reel2 = document.getElementById('reel2');
+    const reel3 = document.getElementById('reel3');
+    const spinBtn = document.getElementById('spinBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const balanceDisplay = document.getElementById('balance');
+    const jackpotDisplay = document.getElementById('jackpot');
+    const winDisplay = document.getElementById('winDisplay');
+    const winAmount = document.getElementById('winAmount');
+    const winCoins = document.getElementById('winCoins');
+    const winLineFlash = document.getElementById('winLineFlash');
+    const jackpotAnimation = document.getElementById('jackpotAnimation');
+    const leverHandle = document.getElementById('leverHandle');
+    const leverStick = document.getElementById('leverStick');
+
+    // Game state
+    let balance = INITIAL_BALANCE;
+    let jackpot = JACKPOT_AMOUNT;
+    let isSpinning = false;
+    let reelsSpinning = [false, false, false];
+    let spinTimeouts = [];
+    let lastResults = [];
+    let autoStopTimeouts = [];
+    let spinCount = 0;
+    let forceJackpot = false;
+    let forceCommonWin = false;
+
+    // Initialize the game
+    initGame();
+
+    // Initialize the casino lights
+    createCasinoLights();
+
+    // Functions
+    function initGame() {
+        updateBalance(balance);
+        initReels();
+        createLights();
+        addEventListeners();
+    }
+
+    function initReels() {
+        [reel1, reel2, reel3].forEach(reel => {
+            reel.innerHTML = '';
+            // Add symbols to each reel
+            for (let i = 0; i < 3; i++) {
+                const randomSymbol = getRandomSymbol();
+                const symbolElement = createSymbolElement(randomSymbol);
+                reel.appendChild(symbolElement);
+            }
+        });
+    }
+
+    function createSymbolElement(symbol) {
+        const symbolElement = document.createElement('div');
+        symbolElement.className = 'symbol';
+        if (SPECIAL_SYMBOLS.includes(symbol)) {
+            symbolElement.classList.add('special');
+        }
+        symbolElement.textContent = symbol;
+        return symbolElement;
+    }
+
+    function getRandomSymbol() {
+        // Make special symbols rarer
+        let randomNum = Math.random();
+        if (randomNum > 0.95) {
+            return SPECIAL_SYMBOLS[Math.floor(Math.random() * SPECIAL_SYMBOLS.length)];
+        } else {
+            return COMMON_SYMBOLS[Math.floor(Math.random() * COMMON_SYMBOLS.length)];
+        }
+    }
+
+    function addEventListeners() {
+        spinBtn.addEventListener('click', startSpin);
+        stopBtn.addEventListener('click', stopSpin);
+        leverHandle.addEventListener('click', pullLever);
+        
+        // Initialize audio on first user interaction
+        document.addEventListener('click', function initAudio() {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            document.removeEventListener('click', initAudio);
+        }, { once: true });
+    }
+
+    function createLights() {
+        const casinoLights = document.querySelector('.casino-lights');
+        casinoLights.innerHTML = '';
+        
+        for (let i = 0; i < 30; i++) {
+            const light = document.createElement('div');
+            light.className = 'light';
+            
+            // Random position
+            light.style.left = `${Math.random() * 100}%`;
+            light.style.top = `${Math.random() * 100}%`;
+            
+            // Random size
+            const size = 10 + Math.random() * 20;
+            light.style.width = `${size}px`;
+            light.style.height = `${size}px`;
+            
+            // Random color
+            const colors = ['#ff0', '#f00', '#0ff', '#0f0', '#f0f'];
+            light.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Animation
+            light.style.animation = `lightPulse ${1 + Math.random() * 2}s infinite alternate`;
+            light.style.animationDelay = `${Math.random() * 2}s`;
+            
+            casinoLights.appendChild(light);
+        }
+    }
+
+    function createCasinoLights() {
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes lightPulse {
+                0% { opacity: 0.2; transform: scale(0.8); }
+                100% { opacity: 0.8; transform: scale(1.2); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        createLights();
+    }
+
+    function pullLever() {
+        if (isSpinning) return;
+        
+        // Animate lever pull
+        leverStick.classList.add('pulled');
+        
+        // Play lever sound
+        playSound('lever');
+        
+        // Wait and then return the lever
+        setTimeout(() => {
+            startSpin();
+            setTimeout(() => {
+                leverStick.classList.remove('pulled');
+                leverStick.classList.add('return');
+                setTimeout(() => {
+                    leverStick.classList.remove('return');
+                }, 500);
+            }, 500);
+        }, 300);
+    }
+
+    function startSpin() {
+        if (isSpinning) return;
+        
+        // Check if player has enough balance
+        if (balance < SPIN_COST) {
+            alert('Not enough credits!');
+            return;
+        }
+        
+        // Deduct spin cost
+        updateBalance(balance - SPIN_COST);
+        
+        // Update UI
+        isSpinning = true;
+        reelsSpinning = [true, true, true];
+        spinBtn.disabled = true;
+        stopBtn.disabled = false;
+        
+        // Hide win display if visible
+        winDisplay.classList.remove('show');
+        
+        // Play spin sound
+        playSound('spin');
+        
+        // Start spinning reels
+        spinReels();
+        
+        // Auto-stop reels after random time
+        setupAutoStop();
+    }
+
+    function spinReels() {
+        // Clear previous results
+        lastResults = [];
+        
+        // Start each reel spinning
+        [reel1, reel2, reel3].forEach((reel, i) => {
+            reel.classList.add('spinning', 'blur-effect');
+            
+            // Reset the reel with random symbols
+            reel.innerHTML = '';
+            for (let j = 0; j < 20; j++) {
+                const randomSymbol = getRandomSymbol();
+                const symbolElement = createSymbolElement(randomSymbol);
+                reel.appendChild(symbolElement);
+            }
+        });
+    }
+
+    function setupAutoStop() {
+        // Clear any existing timeouts
+        autoStopTimeouts.forEach(timeout => clearTimeout(timeout));
+        autoStopTimeouts = [];
+        
+        // Set up auto-stop for each reel with delay
+        [reel1, reel2, reel3].forEach((reel, i) => {
+            const spinTime = MIN_SPIN_TIME + Math.random() * (MAX_SPIN_TIME - MIN_SPIN_TIME);
+            const timeout = setTimeout(() => {
+                if (reelsSpinning[i]) {
+                    stopReel(i);
+                }
+            }, spinTime + (i * REEL_DELAY));
+            
+            autoStopTimeouts.push(timeout);
+        });
+    }
+
+    function stopSpin() {
+        if (!isSpinning) return;
+        
+        // Stop each spinning reel in sequence
+        let delay = 0;
+        
+        for (let i = 0; i < 3; i++) {
+            if (reelsSpinning[i]) {
+                setTimeout(() => {
+                    stopReel(i);
+                }, delay);
+                delay += 300;
+            }
+        }
+        
+        // Clear auto-stop timeouts
+        autoStopTimeouts.forEach(timeout => clearTimeout(timeout));
+        autoStopTimeouts = [];
+    }
+
+    function stopReel(reelIndex) {
+        if (!reelsSpinning[reelIndex]) return;
+        
+        // Get the reel element
+        const reel = [reel1, reel2, reel3][reelIndex];
+        
+        // Stop animation
+        reel.classList.remove('spinning');
+        
+        // Generate result
+        const result = generateResult(reelIndex);
+        lastResults[reelIndex] = result;
+        
+        // Update reel display
+        reel.innerHTML = '';
+        for (let i = 0; i < 3; i++) {
+            const symbolElement = createSymbolElement(result[i]);
+            reel.appendChild(symbolElement);
+        }
+        
+        // Play stop sound
+        playSound('reelStop', 1.0, reelIndex * 0.3); // Slightly different pitch for each reel
+        
+        // Mark this reel as stopped
+        reelsSpinning[reelIndex] = false;
+        
+        // Check if all reels have stopped
+        if (!reelsSpinning.some(spinning => spinning)) {
+            allReelsStopped();
+        }
+    }
+
+    function generateResult(reelIndex) {
+        // Force jackpot every 10 spins
+        if (spinCount % 10 === 9) {
+            // On the last reel, make sure we match the first two reels
+            if (reelIndex === 2) {
+                const symbol1 = document.querySelector('#reel1 .symbol:nth-child(2)').textContent;
+                const symbol2 = document.querySelector('#reel2 .symbol:nth-child(2)').textContent;
+                return [symbol1, symbol1, symbol1];
+            }
+            // For first two reels, use the same symbol
+            else if (reelIndex === 0) {
+                const symbol = getRandomSymbol();
+                return [symbol, symbol, symbol];
+            }
+            else if (reelIndex === 1) {
+                const symbol = document.querySelector('#reel1 .symbol:nth-child(2)').textContent;
+                return [symbol, symbol, symbol];
+            }
+        }
+        
+        // Regular random result for other spins
+        const result = [];
+        for (let i = 0; i < 3; i++) {
+            result.push(getRandomSymbol());
+        }
+        return result;
+    }
+
+    function allReelsStopped() {
+        isSpinning = false;
+        spinBtn.disabled = false;
+        stopBtn.disabled = true;
+        
+        spinCount++;
+        
+        // Get the middle symbol from each reel
+        const middleSymbols = [
+            document.querySelector('#reel1 .symbol:nth-child(2)').textContent,
+            document.querySelector('#reel2 .symbol:nth-child(2)').textContent,
+            document.querySelector('#reel3 .symbol:nth-child(2)').textContent
+        ];
+        
+        checkWin(middleSymbols);
+        
+        setTimeout(() => {
+            [reel1, reel2, reel3].forEach(reel => {
+                reel.classList.remove('blur-effect');
+            });
+        }, 500);
+    }
+
+    function checkWin(symbols) {
+        // Check if all three symbols match
+        if (symbols[0] === symbols[1] && symbols[1] === symbols[2]) {
+            const matchingSymbol = symbols[0];
+            
+            // Award jackpot for any matching symbols
+            // Reset spin count after win
+            spinCount = 0;
+            forceJackpot = false;
+            forceCommonWin = false;
+            
+            // Award jackpot
+            showJackpotWin();
+            
+            // Flash win line
+            winLineFlash.classList.add('flash');
+            setTimeout(() => {
+                winLineFlash.classList.remove('flash');
+            }, 2500);
+        }
+    }
+
+    function showWin(amount) {
+        winAmount.textContent = amount;
+        winDisplay.classList.add('show');
+        createCoinEffect(amount);
+        playSound('win');
+        setTimeout(() => {
+            winDisplay.classList.remove('show');
+        }, 3000);
+    }
+
+    function showJackpotWin() {
+        updateBalance(balance + JACKPOT_AMOUNT);
+        winAmount.textContent = JACKPOT_AMOUNT;
+        winDisplay.classList.add('show');
+        jackpotAnimation.classList.add('show');
+        createCoinEffect(JACKPOT_AMOUNT, true);
+        playSound('jackpot');
+        setTimeout(() => {
+            winDisplay.classList.remove('show');
+            jackpotAnimation.classList.remove('show');
+        }, 5000);
+        window.showConfetti(); // Trigger confetti effect
+    }
+
+    function createCoinEffect(amount, isJackpot = false) {
+        // Clear existing coins
+        winCoins.innerHTML = '';
+        
+        // Determine number of coins based on win amount
+        const coinCount = isJackpot ? 150 : Math.min(Math.floor(amount / 10), 50);
+        
+        for (let i = 0; i < coinCount; i++) {
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            
+            // Random position
+            coin.style.left = `${10 + Math.random() * 80}%`;
+            
+            // Random size for jackpot
+            if (isJackpot) {
+                const size = 20 + Math.random() * 30;
+                coin.style.width = `${size}px`;
+                coin.style.height = `${size}px`;
+            }
+            
+            // Random animation duration
+            coin.style.animationDuration = `${1 + Math.random() * 2}s`;
+            
+            // Random delay
+            coin.style.animationDelay = `${Math.random() * 0.5}s`;
+            
+            winCoins.appendChild(coin);
+            
+            // Make coin drop sound with slight delay between coins
+            if (i % 10 === 0) {
+                setTimeout(() => {
+                    playSound('coinDrop', 0.3);
+                }, i * 30);
+            }
+            
+            // Remove coin after animation completes
+            setTimeout(() => {
+                if (coin.parentNode === winCoins) {
+                    winCoins.removeChild(coin);
+                }
+            }, 3000);
+        }
+    }
+
+    function updateBalance(newBalance) {
+        balance = newBalance;
+        balanceDisplay.textContent = balance;
+    }
+
+    // Custom synthesized sound effects using Web Audio API
+    function playSound(soundType, volume = 1.0, pitchOffset = 0) {
+        // Resume audio context if suspended (needed due to browser autoplay policies)
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        
+        // Create volume control
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = volume;
+        gainNode.connect(audioCtx.destination);
+        
+        switch(soundType) {
+            case 'spin':
+                createSpinSound(gainNode);
+                break;
+            case 'reelStop':
+                createReelStopSound(gainNode, pitchOffset);
+                break;
+            case 'win':
+                createWinSound(gainNode);
+                break;
+            case 'jackpot':
+                createJackpotSound(gainNode);
+                break;
+            case 'lever':
+                createLeverSound(gainNode);
+                break;
+            case 'coinDrop':
+                createCoinDropSound(gainNode, pitchOffset);
+                break;
+            default:
+                console.log(`Sound type ${soundType} not implemented`);
+        }
+    }
+    
+    function createSpinSound(gainNode) {
+        // Create noise for spinning sound
+        const bufferSize = 2 * audioCtx.sampleRate;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        
+        // Fill buffer with noise
+        for (let i = 0; i < bufferSize; i++) {
+            output[i] = Math.random() * 2 - 1;
+        }
+        
+        // Create noise source
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        
+        // Create filter for shaping the noise
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 3000;
+        filter.Q.value = 1;
+        
+        // Connect nodes
+        noise.connect(filter);
+        
+        // Modulate the filter frequency for spinning effect
+        const lfo = audioCtx.createOscillator();
+        lfo.type = 'triangle';
+        lfo.frequency.value = 12;
+        
+        const lfoGain = audioCtx.createGain();
+        lfoGain.gain.value = 1500;
+        
+        lfo.connect(lfoGain);
+        lfoGain.connect(filter.frequency);
+        
+        // Apply envelope to volume
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.1);
+        gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 1.5);
+        gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2.0);
+        
+        // Connect to output and play
+        filter.connect(gainNode);
+        
+        noise.start();
+        lfo.start();
+        
+        // Stop after 2 seconds
+        noise.stop(audioCtx.currentTime + 2.0);
+        lfo.stop(audioCtx.currentTime + 2.0);
+    }
+    
+    function createReelStopSound(gainNode, pitchOffset) {
+        // Create oscillator
+        const osc = audioCtx.createOscillator();
+        osc.type = 'square';
+        osc.frequency.value = 220 + (pitchOffset * 100); // Base frequency with offset
+        
+        // Create filter
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 1500;
+        
+        // Connect nodes
+        osc.connect(filter);
+        filter.connect(gainNode);
+        
+        // Set envelope
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.8, audioCtx.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        
+        // Pitch bend
+        osc.frequency.setValueAtTime(180 + (pitchOffset * 100), audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(60 + (pitchOffset * 30), audioCtx.currentTime + 0.3);
+        
+        // Play sound
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+    }
+    
+    function createWinSound(gainNode) {
+        // Play a sequence of ascending notes
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        
+        notes.forEach((freq, i) => {
+            // Create oscillator
+            const osc = audioCtx.createOscillator();
+            osc.type = 'sine';
+            
+            // Create modulator for bell-like sound
+            const modulator = audioCtx.createOscillator();
+            modulator.type = 'sine';
+            modulator.frequency.value = freq * 2;
+            
+            const modulatorGain = audioCtx.createGain();
+            modulatorGain.gain.value = 50;
+            
+            modulator.connect(modulatorGain);
+            modulatorGain.connect(osc.frequency);
+            
+            // Connect main oscillator to output
+            osc.connect(gainNode);
+            
+            // Set timing and envelope
+            const startTime = audioCtx.currentTime + (i * 0.15);
+            const duration = 0.3;
+            
+            // Set volume envelope
+            gainNode.gain.setValueAtTime(0, startTime);
+            gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            
+            // Start and stop
+            osc.frequency.setValueAtTime(freq, startTime);
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+            
+            modulator.start(startTime);
+            modulator.stop(startTime + duration);
+            
+            // Add some sparkle at the end
+            if (i === notes.length - 1) {
+                setTimeout(() => {
+                    createSparkleSound(gainNode);
+                }, (i * 0.15 + 0.2) * 1000);
+            }
+        });
+    }
+    
+    function createSparkleSound(gainNode) {
+        // Create noise for sparkle effect
+        const bufferSize = audioCtx.sampleRate / 2;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        
+        // Fill buffer with noise
+        for (let i = 0; i < bufferSize; i++) {
+            output[i] = Math.random() * 2 - 1;
+        }
+        
+        // Create noise source
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        
+        // Create filter for high sparkle sound
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 6000;
+        filter.Q.value = 10;
+        
+        // Connect nodes
+        noise.connect(filter);
+        filter.connect(gainNode);
+        
+        // Apply envelope
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+        
+        // Play sound
+        noise.start();
+        noise.stop(audioCtx.currentTime + 0.5);
+        
+        // Add a few more sparkles
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                const miniSparkle = audioCtx.createOscillator();
+                miniSparkle.type = 'sine';
+                miniSparkle.frequency.value = 4000 + Math.random() * 4000;
+                
+                const sparkleGain = audioCtx.createGain();
+                sparkleGain.gain.value = 0.1;
+                
+                miniSparkle.connect(sparkleGain);
+                sparkleGain.connect(audioCtx.destination);
+                
+                sparkleGain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                sparkleGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                
+                miniSparkle.start();
+                miniSparkle.stop(audioCtx.currentTime + 0.2);
+            }, i * 100);
+        }
+    }
+    
+    function createJackpotSound(gainNode) {
+        // Create a more elaborate win sound first
+        createWinSound(gainNode);
+        
+        // Then add a triumphant fanfare
+        setTimeout(() => {
+            const fanfareNotes = [
+                {note: 523.25, duration: 0.2}, // C5
+                {note: 523.25, duration: 0.2}, // C5
+                {note: 783.99, duration: 0.4}, // G5
+                {note: 783.99, duration: 0.4}, // G5
+                {note: 880.00, duration: 0.2}, // A5
+                {note: 987.77, duration: 0.2}, // B5
+                {note: 1046.50, duration: 0.6}  // C6
+            ];
+            
+            let time = audioCtx.currentTime;
+            
+            fanfareNotes.forEach(noteObj => {
+                const osc = audioCtx.createOscillator();
+                osc.type = 'square';
+                osc.frequency.value = noteObj.note;
+                
+                const noteGain = audioCtx.createGain();
+                noteGain.gain.value = 0.3;
+                
+                osc.connect(noteGain);
+                noteGain.connect(audioCtx.destination);
+                
+                osc.start(time);
+                osc.stop(time + noteObj.duration);
+                
+                // Apply envelope
+                noteGain.gain.setValueAtTime(0, time);
+                noteGain.gain.linearRampToValueAtTime(0.3, time + 0.05);
+                noteGain.gain.linearRampToValueAtTime(0.2, time + noteObj.duration - 0.05);
+                noteGain.gain.linearRampToValueAtTime(0, time + noteObj.duration);
+                
+                time += noteObj.duration;
+            });
+            
+            // Add cascading coin sounds
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    createCoinDropSound(gainNode, Math.random() - 0.5);
+                }, 800 + i * 80);
+            }
+            
+            // Final crescendo
+            setTimeout(() => {
+                const crescendo = audioCtx.createOscillator();
+                crescendo.type = 'sawtooth';
+                
+                const crescendoFilter = audioCtx.createBiquadFilter();
+                crescendoFilter.type = 'lowpass';
+                crescendoFilter.frequency.value = 800;
+                crescendoFilter.Q.value = 5;
+                
+                crescendo.connect(crescendoFilter);
+                
+                const crescendoGain = audioCtx.createGain();
+                crescendoGain.gain.value = 0;
+                
+                crescendoFilter.connect(crescendoGain);
+                crescendoGain.connect(audioCtx.destination);
+                
+                // Sweep up
+                crescendo.frequency.setValueAtTime(200, audioCtx.currentTime);
+                crescendo.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 1.5);
+                
+                // Envelope
+                crescendoGain.gain.setValueAtTime(0, audioCtx.currentTime);
+                crescendoGain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 1.0);
+                crescendoGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
+                
+                crescendo.start();
+                crescendo.stop(audioCtx.currentTime + 1.5);
+                
+                // Add more sparkles for finale
+                setTimeout(() => {
+                    for (let i = 0; i < 10; i++) {
+                        setTimeout(() => {
+                            createSparkleSound(gainNode);
+                        }, i * 150);
+                    }
+                }, 1600);
+                
+            }, 2000);
+        }, 500);
+    }
+    
+    function createLeverSound(gainNode) {
+        // Create a mechanical click sound
+        const clickOsc = audioCtx.createOscillator();
+        clickOsc.type = 'square';
+        clickOsc.frequency.value = 80;
+        
+        const clickFilter = audioCtx.createBiquadFilter();
+        clickFilter.type = 'lowpass';
+        clickFilter.frequency.value = 500;
+        
+        clickOsc.connect(clickFilter);
+        clickFilter.connect(gainNode);
+        
+        // Set envelope for a short click
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.7, audioCtx.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+        
+        // Pitch bend down slightly
+        clickOsc.frequency.setValueAtTime(120, audioCtx.currentTime);
+        clickOsc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + 0.15);
+        
+        clickOsc.start();
+        clickOsc.stop(audioCtx.currentTime + 0.15);
+        
+        // Add a mechanical spring sound 
+        setTimeout(() => {
+            const springOsc = audioCtx.createOscillator();
+            springOsc.type = 'sawtooth';
+            
+            const springFilter = audioCtx.createBiquadFilter();
+            springFilter.type = 'bandpass';
+            springFilter.frequency.value = 2000;
+            springFilter.Q.value = 3;
+            
+            springOsc.connect(springFilter);
+            
+            const springGain = audioCtx.createGain();
+            springGain.gain.value = 0.1;
+            
+            springFilter.connect(springGain);
+            springGain.connect(audioCtx.destination);
+            
+            // Rapid pitch modulation for spring effect
+            springOsc.frequency.setValueAtTime(1800, audioCtx.currentTime);
+            
+            // Create rapid wavering effect
+            const vibratoSpeed = 50;
+            const vibratoDepth = 400;
+            for (let i = 0; i < 20; i++) {
+                const t = audioCtx.currentTime + (i * 0.01);
+                const direction = i % 2 === 0 ? 1 : -1;
+                springOsc.frequency.linearRampToValueAtTime(
+                    1800 + (direction * vibratoDepth), 
+                    t
+                );
+                vibratoDepth = Math.max(vibratoDepth * 0.8, 100);
+            }
+            
+            // Amplitude envelope
+            springGain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            springGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            
+            springOsc.start();
+            springOsc.stop(audioCtx.currentTime + 0.3);
+        }, 150);
+    }
+    
+    function createCoinDropSound(gainNode, pitchOffset = 0) {
+        // Create a metallic coin drop sound
+        const coinOsc = audioCtx.createOscillator();
+        coinOsc.type = 'triangle';
+        coinOsc.frequency.value = 1500 + (pitchOffset * 200);
+        
+        const metalFilter = audioCtx.createBiquadFilter();
+        metalFilter.type = 'bandpass';
+        metalFilter.frequency.value = 3000 + (pitchOffset * 500);
+        metalFilter.Q.value = 8;
+        
+        coinOsc.connect(metalFilter);
+        metalFilter.connect(gainNode);
+        
+        // Envelope
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+        
+        // Frequency sweep
+        coinOsc.frequency.setValueAtTime(1500 + (pitchOffset * 200), audioCtx.currentTime);
+        coinOsc.frequency.exponentialRampToValueAtTime(500 + (pitchOffset * 100), audioCtx.currentTime + 0.2);
+        
+        coinOsc.start();
+        coinOsc.stop(audioCtx.currentTime + 0.2);
+        
+        // Add a little bounce/impact sound
+        setTimeout(() => {
+            const bounceOsc = audioCtx.createOscillator();
+            bounceOsc.type = 'sine';
+            bounceOsc.frequency.value = 400 + (pitchOffset * 50);
+            
+            const bounceGain = audioCtx.createGain();
+            bounceGain.gain.value = 0.05;
+            
+            bounceOsc.connect(bounceGain);
+            bounceGain.connect(audioCtx.destination);
+            
+            bounceGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            bounceGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            
+            bounceOsc.frequency.setValueAtTime(400 + (pitchOffset * 50), audioCtx.currentTime);
+            bounceOsc.frequency.exponentialRampToValueAtTime(300 + (pitchOffset * 50), audioCtx.currentTime + 0.1);
+            
+            bounceOsc.start();
+            bounceOsc.stop(audioCtx.currentTime + 0.1);
+        }, 100);
+    }
+
+    // Add preloading of web fonts to ensure proper styling
+    document.addEventListener('DOMContentLoaded', function() {
+        // Preload fonts for better visual experience
+        const fontPreloader = document.createElement('div');
+        fontPreloader.style.fontFamily = "'Bungee Inline', cursive";
+        fontPreloader.style.opacity = '0';
+        fontPreloader.style.position = 'absolute';
+        fontPreloader.innerHTML = 'Font preloader';
+        document.body.appendChild(fontPreloader);
+        
+        // Remove preloader after fonts are loaded
+        setTimeout(() => {
+            if (fontPreloader.parentNode) {
+                document.body.removeChild(fontPreloader);
+            }
+        }, 1000);
+        
+        // Add link for Google Fonts
+        const fontLink = document.createElement('link');
+        fontLink.rel = 'stylesheet';
+        fontLink.href = 'https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Poppins:wght@400;600;800&display=swap';
+        document.head.appendChild(fontLink);
+    });
+
+    // Add enhanced visual effects for the reels
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add subtle reel shadow effect
+        const reelContainers = document.querySelectorAll('.reel-container');
+        reelContainers.forEach(container => {
+            const shadowOverlay = document.createElement('div');
+            shadowOverlay.className = 'reel-shadow';
+            shadowOverlay.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                box-shadow: inset 0 10px 20px rgba(0,0,0,0.3), inset 0 -10px 20px rgba(0,0,0,0.3);
+                pointer-events: none;
+                border-radius: 8px;
+                z-index: 2;
+            `;
+            container.appendChild(shadowOverlay);
+        });
+        
+        // Add reflection effect to symbols
+        const addReflections = () => {
+            const symbols = document.querySelectorAll('.symbol');
+            symbols.forEach(symbol => {
+                if (!symbol.querySelector('.symbol-reflection')) {
+                    const reflection = document.createElement('div');
+                    reflection.className = 'symbol-reflection';
+                    reflection.style.cssText = `
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 50%;
+                        background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0));
+                        z-index: 1;
+                        pointer-events: none;
+                    `;
+                    symbol.style.position = 'relative';
+                    symbol.appendChild(reflection);
+                }
+            });
+        };
+        
+        // Call once on load and again anytime the reels change
+        addReflections();
+        setInterval(addReflections, 1000); // Periodically add reflections to any new symbols
+        
+        // Add ambient casino sounds
+        let ambientSound = null;
+        
+        const startAmbientSound = () => {
+            if (ambientSound) return;
+            
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioCtx = new AudioContext();
+            
+            // Create noise generator for ambient casino sounds
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            
+            // Fill buffer with colored noise
+            let b0, b1, b2, b3, b4, b5, b6;
+            b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
+            
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                
+                // Pink noise filter
+                b0 = 0.99886 * b0 + white * 0.0555179;
+                b1 = 0.99332 * b1 + white * 0.0750759;
+                b2 = 0.96900 * b2 + white * 0.1538520;
+                b3 = 0.86650 * b3 + white * 0.3104856;
+                b4 = 0.55000 * b4 + white * 0.5329522;
+                b5 = -0.7616 * b5 - white * 0.0168980;
+                
+                // Mix pink noise
+                output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                output[i] *= 0.11; // Lower volume
+                
+                b6 = white * 0.115926;
+            }
+            
+            // Create noise source
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = noiseBuffer;
+            noise.loop = true;
+            
+            // Create filter for ambient casino sound
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 400;
+            filter.Q.value = 0.5;
+            
+            // Create gain node for volume control
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.value = 0.1;
+            
+            // Connect nodes
+            noise.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            // Start playing
+            noise.start();
+            
+            // Fade in
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 3.0);
+            
+            ambientSound = {
+                source: noise,
+                gain: gainNode,
+                context: audioCtx
+            };
+        };
+        
+        // Start ambient sound on first user interaction
+        document.addEventListener('click', function startAmbient() {
+            startAmbientSound();
+            document.removeEventListener('click', startAmbient);
+        }, { once: true });
+        
+        // Add confetti effect for big wins
+        function createConfetti() {
+            const confettiContainer = document.createElement('div');
+            confettiContainer.className = 'confetti-container';
+            confettiContainer.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 1000;
+                overflow: hidden;
+            `;
+            document.body.appendChild(confettiContainer);
+            
+            const colors = ['#ff4136', '#0074d9', '#ffdc00', '#2ecc40', '#ff851b', '#b10dc9', '#f012be'];
+            
+            for (let i = 0; i < 200; i++) {
+                const confetti = document.createElement('div');
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                confetti.className = 'confetti-piece';
+                confetti.style.cssText = `
+                    position: absolute;
+                    width: ${5 + Math.random() * 10}px;
+                    height: ${5 + Math.random() * 10}px;
+                    background-color: ${color};
+                    opacity: ${0.6 + Math.random() * 0.4};
+                    top: -50px;
+                    left: ${Math.random() * 100}vw;
+                    transform: rotate(${Math.random() * 360}deg);
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                    animation: confetti-fall ${3 + Math.random() * 5}s linear forwards;
+                    animation-delay: ${Math.random() * 3}s;
+                `;
+                
+                confettiContainer.appendChild(confetti);
+            }
+            
+            // Define the confetti fall animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes confetti-fall {
+                    0% {
+                        transform: translateY(-50px) rotate(0deg);
+                        opacity: 1;
+                    }
+                    70% {
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translateY(${window.innerHeight + 100}px) rotate(${720 + Math.random() * 720}deg);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Remove confetti container after animation completes
+            setTimeout(() => {
+                if (confettiContainer.parentNode) {
+                    document.body.removeChild(confettiContainer);
+                }
+            }, 8000);
+        }
+        
+        // Expose confetti function to global scope for jackpot wins
+        window.showConfetti = createConfetti;
+        
+        // Enhance jackpot animation
+        const enhanceJackpotAnimation = () => {
+            const jackpotAnimation = document.getElementById('jackpotAnimation');
+            if (!jackpotAnimation) return;
+            
+            // Add rays around the jackpot text
+            const rays = document.createElement('div');
+            rays.className = 'jackpot-rays';
+            rays.style.cssText = `
+                position: absolute;
+                width: 200%;
+                height: 200%;
+                background-image: conic-gradient(
+                    from 0deg, 
+                    transparent 0deg, 
+                    rgba(255, 215, 0, 0.7) 5deg, 
+                    transparent 10deg,
+                    transparent 30deg, 
+                    rgba(255, 215, 0, 0.7) 35deg, 
+                    transparent 40deg,
+                    transparent 60deg, 
+                    rgba(255, 215, 0, 0.7) 65deg, 
+                    transparent 70deg,
+                    transparent 90deg, 
+                    rgba(255, 215, 0, 0.7) 95deg, 
+                    transparent 100deg,
+                    transparent 120deg, 
+                    rgba(255, 215, 0, 0.7) 125deg, 
+                    transparent 130deg,
+                    transparent 150deg, 
+                    rgba(255, 215, 0, 0.7) 155deg, 
+                    transparent 160deg,
+                    transparent 180deg, 
+                    rgba(255, 215, 0, 0.7) 185deg, 
+                    transparent 190deg,
+                    transparent 210deg, 
+                    rgba(255, 215, 0, 0.7) 215deg, 
+                    transparent 220deg,
+                    transparent 240deg, 
+                    rgba(255, 215, 0, 0.7) 245deg, 
+                    transparent 250deg,
+                    transparent 270deg, 
+                    rgba(255, 215, 0, 0.7) 275deg, 
+                    transparent 280deg,
+                    transparent 300deg, 
+                    rgba(255, 215, 0, 0.7) 305deg, 
+                    transparent 310deg,
+                    transparent 330deg, 
+                    rgba(255, 215, 0, 0.7) 335deg, 
+                    transparent 340deg
+                );
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                animation: jackpot-rays-rotate 20s linear infinite;
+                z-index: 0;
+            `;
+            jackpotAnimation.appendChild(rays);
+            
+            // Add animation keyframes for the rays
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes jackpot-rays-rotate {
+                    0% {
+                        transform: translate(-50%, -50%) rotate(0deg);
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) rotate(360deg);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Replace original jackpot show function with enhanced version
+            const originalShowJackpot = window.showJackpotWin;
+            if (typeof originalShowJackpot === 'function') {
+                window.showJackpotWin = function() {
+                    originalShowJackpot.apply(this, arguments);
+                    setTimeout(() => {
+                        window.showConfetti();
+                    }, 500);
+                    
+                    // Add spotlight effects
+                    const spotlights = document.createElement('div');
+                    spotlights.className = 'jackpot-spotlights';
+                    spotlights.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        pointer-events: none;
+                        z-index: 900;
+                    `;
+                    document.body.appendChild(spotlights);
+                    
+                    // Create multiple spotlights
+                    for (let i = 0; i < 5; i++) {
+                        const spotlight = document.createElement('div');
+                        spotlight.className = 'jackpot-spotlight';
+                        spotlight.style.cssText = `
+                            position: absolute;
+                            width: 300px;
+                            height: 300px;
+                            border-radius: 50%;
+                            background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, rgba(255,215,0,0) 70%);
+                            transform-origin: center;
+                            animation: spotlight-move 3s infinite alternate ease-in-out;
+                            animation-delay: ${i * 0.5}s;
+                            opacity: 0;
+                        `;
+                        
+                        // Random position
+                        spotlight.style.left = `${10 + Math.random() * 80}%`;
+                        spotlight.style.top = `${10 + Math.random() * 80}%`;
+                        
+                        spotlights.appendChild(spotlight);
+                    }
+                    
+                    // Add spotlight animation
+                    const spotlightStyle = document.createElement('style');
+                    spotlightStyle.textContent = `
+                        @keyframes spotlight-move {
+                            0% {
+                                transform: scale(0);
+                                opacity: 0;
+                            }
+                            10% {
+                                opacity: 1;
+                            }
+                            50% {
+                                transform: scale(1);
+                            }
+                            90% {
+                                opacity: 1;
+                            }
+                            100% {
+                                transform: scale(0.5);
+                                opacity: 0;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(spotlightStyle);
+                    
+                    // Remove spotlight effects after animation completes
+                    setTimeout(() => {
+                        if (spotlights.parentNode) {
+                            document.body.removeChild(spotlights);
+                        }
+                    }, 5000);
+                };
+            }
+        };
+        
+        enhanceJackpotAnimation();
+        
+        // Add pulses of light when winning
+        const originalShowWin = window.showWin;
+        if (typeof originalShowWin === 'function') {
+            window.showWin = function(amount) {
+                originalShowWin.apply(this, arguments);
+                
+                // Only add extra effects for significant wins
+                if (amount >= 100) {
+                    const pulseContainer = document.createElement('div');
+                    pulseContainer.className = 'win-pulse-container';
+                    pulseContainer.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        pointer-events: none;
+                        z-index: 900;
+                        opacity: 0;
+                        animation: fade-in-out 3s forwards;
+                    `;
+                    document.body.appendChild(pulseContainer);
+                    
+                    const pulse = document.createElement('div');
+                    pulse.className = 'win-pulse';
+                    pulse.style.cssText = `
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 100px;
+                        height: 100px;
+                        border-radius: 50%;
+                        background: radial-gradient(circle, rgba(255,215,0,0.7) 0%, rgba(255,215,0,0) 70%);
+                        animation: pulse-grow 1s ease-out infinite;
+                    `;
+                    pulseContainer.appendChild(pulse);
+                    
+                    // Add animation keyframes
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes pulse-grow {
+                            0% {
+                                transform: translate(-50%, -50%) scale(0.8);
+                                opacity: 1;
+                            }
+                            100% {
+                                transform: translate(-50%, -50%) scale(4);
+                                opacity: 0;
+                            }
+                        }
+                        
+                        @keyframes fade-in-out {
+                            0% { opacity: 0; }
+                            10% { opacity: 1; }
+                            90% { opacity: 1; }
+                            100% { opacity: 0; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    // Remove pulse effects after animation completes
+                    setTimeout(() => {
+                        if (pulseContainer.parentNode) {
+                            document.body.removeChild(pulseContainer);
+                        }
+                    }, 3000);
+                    
+                    // Add smaller confetti for medium wins
+                    if (amount >= 300) {
+                        setTimeout(() => {
+                            const miniConfettiContainer = document.createElement('div');
+                            miniConfettiContainer.className = 'mini-confetti-container';
+                            miniConfettiContainer.style.cssText = `
+                                position: fixed;
+                                top: 0;
+                                left: 0;
+                                width: 100%;
+                                height: 100%;
+                                pointer-events: none;
+                                z-index: 900;
+                                overflow: hidden;
+                            `;
+                            document.body.appendChild(miniConfettiContainer);
+                            
+                            const colors = ['#ff4136', '#0074d9', '#ffdc00', '#2ecc40'];
+                            
+                            for (let i = 0; i < 50; i++) {
+                                const confetti = document.createElement('div');
+                                const color = colors[Math.floor(Math.random() * colors.length)];
+                                
+                                confetti.className = 'mini-confetti-piece';
+                                confetti.style.cssText = `
+                                    position: absolute;
+                                    width: ${2 + Math.random() * 5}px;
+                                    height: ${2 + Math.random() * 5}px;
+                                    background-color: ${color};
+                                    opacity: ${0.6 + Math.random() * 0.4};
+                                    top: -20px;
+                                    left: ${Math.random() * 100}vw;
+                                    transform: rotate(${Math.random() * 360}deg);
+                                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                                    animation: mini-confetti-fall ${2 + Math.random() * 3}s linear forwards;
+                                `;
+                                
+                                miniConfettiContainer.appendChild(confetti);
+                            }
+                            
+                            // Define the mini confetti fall animation
+                            const confettiStyle = document.createElement('style');
+                            confettiStyle.textContent = `
+                                @keyframes mini-confetti-fall {
+                                    0% {
+                                        transform: translateY(-20px) rotate(0deg);
+                                        opacity: 1;
+                                    }
+                                    70% {
+                                        opacity: 1;
+                                    }
+                                    100% {
+                                        transform: translateY(${window.innerHeight + 50}px) rotate(${360 + Math.random() * 360}deg);
+                                        opacity: 0;
+                                    }
+                                }
+                            `;
+                            document.head.appendChild(confettiStyle);
+                            
+                            // Remove mini confetti container after animation completes
+                            setTimeout(() => {
+                                if (miniConfettiContainer.parentNode) {
+                                    document.body.removeChild(miniConfettiContainer);
+                                }
+                            }, 5000);
+                        }, 500);
+                    }
+                }
+            };
+        }
+    });
+    </script>
+</body>
+</html>

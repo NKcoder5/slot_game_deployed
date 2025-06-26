@@ -1,0 +1,217 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Slots - Welcome</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #welcome {
+            background: url('https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+        }
+
+        #welcome::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s forwards 0.5s;
+        }
+
+        .play-btn {
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            background: linear-gradient(45deg, #ffd700, #ff6b6b);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s forwards 1s;
+        }
+
+        .play-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        #features {
+            background: linear-gradient(45deg, #16213e, #1a1a2e);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            padding: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            transition: transform 0.3s;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .feature-card:nth-child(1) { animation: fadeInUp 1s forwards 0.2s; }
+        .feature-card:nth-child(2) { animation: fadeInUp 1s forwards 0.4s; }
+        .feature-card:nth-child(3) { animation: fadeInUp 1s forwards 0.6s; }
+        .feature-card:nth-child(4) { animation: fadeInUp 1s forwards 0.8s; }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            color: #ffd700;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ffd700, 0 0 20px #ffd700;
+            }
+            to {
+                text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ffd700, 0 0 40px #ffd700;
+            }
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .coins {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .coin {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #ffd700;
+            border-radius: 50%;
+            animation: coinFall 3s linear infinite;
+        }
+
+        @keyframes coinFall {
+            0% {
+                transform: translateY(-100%) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section id="welcome" class="section">
+        <div class="content">
+            <h1>Lucky Slots</h1>
+            <p class="subtitle">Experience the thrill of winning big!</p>
+            <a href="{% url 'slot_game' %}" class="play-btn">Play Now</a>
+        </div>
+        <div class="coins" id="coins"></div>
+    </section>
+
+    <section id="features" class="section">
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>Huge Jackpots</h3>
+                <p>Win massive prizes with our progressive jackpot system</p>
+            </div>
+            <div class="feature-card">
+                <h3>Amazing Graphics</h3>
+                <p>Enjoy stunning visuals and smooth animations</p>
+            </div>
+            <div class="feature-card">
+                <h3>Daily Bonuses</h3>
+                <p>Get free spins and bonus coins every day</p>
+            </div>
+            <div class="feature-card">
+                <h3>Safe & Secure</h3>
+                <p>Play with peace of mind on our secure platform</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function createCoin() {
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            coin.style.left = Math.random() * 100 + '%';
+            document.querySelector('.coins').appendChild(coin);
+            
+            coin.addEventListener('animationend', () => {
+                coin.remove();
+            });
+        }
+
+        setInterval(createCoin, 300);
+    </script>
+</body>
+</html> 
